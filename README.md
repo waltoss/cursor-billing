@@ -4,6 +4,9 @@ Automatically downloads the latest Cursor billing invoice and emails it via Mail
 
 Uses Playwright with a persistent browser session: first run requires manual Google OAuth login in a headed browser, subsequent runs work headless.
 
+![Screenshot of Cursor billing invoice downloader UI](./docs/cursor-billing.png)
+
+
 ## Setup
 
 ```bash
