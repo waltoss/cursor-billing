@@ -1,6 +1,6 @@
 # Cursor Billing Invoice Auto-Downloader & Emailer
 
-Automatically downloads the latest Cursor billing invoice and emails it to thomas.walter@theodo.com via Mail.app.
+Automatically downloads the latest Cursor billing invoice and emails it via Mail.app.
 
 Uses Playwright with a persistent browser session: first run requires manual Google OAuth login in a headed browser, subsequent runs work headless.
 
@@ -43,6 +43,16 @@ To remove the schedule:
 
 ```bash
 npm run unschedule
+```
+
+## Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EMAIL_TO` | `thomas.walter@theodo.com` | Recipient email address |
+
+```bash
+EMAIL_TO=someone@example.com npm start
 ```
 
 ## How it works

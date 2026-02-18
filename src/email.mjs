@@ -4,7 +4,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-const RECIPIENT = "thomas.walter@theodo.com";
+const RECIPIENT = process.env.EMAIL_TO || "thomas.walter@theodo.com";
 
 function getInvoiceSubject() {
   const now = new Date();
