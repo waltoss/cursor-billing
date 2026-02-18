@@ -1,0 +1,18 @@
+{
+  "name": "cursor-billing",
+  "version": "1.0.0",
+  "description": "Auto-download Cursor billing invoices and email them",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.mjs",
+    "login": "node src/index.mjs --login",
+    "schedule": "ln -sf \"$(pwd)/launchd/com.theodo.cursor-billing.plist\" ~/Library/LaunchAgents/ && launchctl load -w ~/Library/LaunchAgents/com.theodo.cursor-billing.plist && echo 'Scheduled: runs on the 3rd of each month at 10:00 AM'",
+    "unschedule": "launchctl unload ~/Library/LaunchAgents/com.theodo.cursor-billing.plist 2>/dev/null; rm -f ~/Library/LaunchAgents/com.theodo.cursor-billing.plist && echo 'Unscheduled'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.58.2"
+  }
+}
