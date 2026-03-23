@@ -6,15 +6,10 @@ const execFileAsync = promisify(execFile);
 
 const RECIPIENT = process.env.EMAIL_TO || "thomas.walter@theodo.com";
 
-function getInvoiceSubject() {
-  const now = new Date();
-  const month = now.toLocaleString("en-US", { month: "long", year: "numeric" });
-  return `Cursor Invoice - ${month}`;
-}
-
 export async function sendEmail(pdfPath) {
   const absolutePath = path.resolve(pdfPath);
-  const subject = getInvoiceSubject();
+  const filename = path.basename(pdfPath, ".pdf");
+  const subject = `Cursor Invoice - ${filename}`;
   const body = `Please find attached the latest Cursor billing invoice.`;
 
   const script = `

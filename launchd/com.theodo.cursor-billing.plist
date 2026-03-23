@@ -18,8 +18,8 @@
 
   <key>StartCalendarInterval</key>
   <dict>
-    <key>Day</key>
-    <integer>3</integer>
+    <key>Weekday</key>
+    <integer>1</integer>
     <key>Hour</key>
     <integer>10</integer>
     <key>Minute</key>

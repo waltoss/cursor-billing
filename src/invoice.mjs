@@ -70,7 +70,7 @@ async function collectInvoiceAnchors(page) {
 
 async function tryDownloadFromAnchors(context, urls) {
   await fs.mkdir(DOWNLOAD_DIR, { recursive: true });
-  let downloaded = null;
+  const downloaded = [];
 
   for (const url of urls) {
     try {
@@ -88,14 +88,13 @@ async function tryDownloadFromAnchors(context, urls) {
 
       if (existsSync(targetPath)) {
         console.log(`Already exists: ${filename}`);
-        downloaded = targetPath;
-        break;
+        downloaded.push(targetPath);
+        continue;
       }
 
       await fs.writeFile(targetPath, body);
       console.log(`Downloaded: ${filename}`);
-      downloaded = targetPath;
-      break; // We only need the latest invoice
+      downloaded.push(targetPath);
     } catch {
       // try next
     }
@@ -155,14 +154,14 @@ async function tryPrintPageAsPdf(page) {
   return targetPath;
 }
 
-export async function downloadLatestInvoice(context, page) {
+export async function downloadAllInvoices(context, page) {
   // Strategy 1: Find invoice anchor links and fetch the PDF directly
   const anchorUrls = await collectInvoiceAnchors(page);
   console.log(`Found ${anchorUrls.length} invoice-related link(s)`);
 
   if (anchorUrls.length > 0) {
-    const result = await tryDownloadFromAnchors(context, anchorUrls);
-    if (result) return result;
+    const results = await tryDownloadFromAnchors(context, anchorUrls);
+    if (results.length > 0) return results;
 
     // Fallback: follow first link and look for download buttons on Stripe page
     for (const url of anchorUrls) {
@@ -173,7 +172,7 @@ export async function downloadLatestInvoice(context, page) {
 
         const result = await tryDownloadFromButtons(stripePage);
         await stripePage.close();
-        if (result) return result;
+        if (result) return [result];
       } catch {
         // try next
       }
@@ -182,9 +181,10 @@ export async function downloadLatestInvoice(context, page) {
 
   // Strategy 2: Look for download buttons on the billing page itself
   const fromButtons = await tryDownloadFromButtons(page);
-  if (fromButtons) return fromButtons;
+  if (fromButtons) return [fromButtons];
 
   // Strategy 3: Last resort — print the billing page as PDF
   console.log("No downloadable invoice found, printing billing page as PDF...");
-  return tryPrintPageAsPdf(page);
+  const printed = await tryPrintPageAsPdf(page);
+  return [printed];
 }
