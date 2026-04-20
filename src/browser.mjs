@@ -46,6 +46,21 @@ export function bringToFront() {
   }
 }
 
+export function notify(title, message) {
+  try {
+    execFileSync(
+      "osascript",
+      [
+        "-e",
+        `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)} sound name "Submarine"`,
+      ],
+      { stdio: "ignore" },
+    );
+  } catch {
+    // Ignore — notifications are best-effort
+  }
+}
+
 export async function waitForLogin(page, timeoutMs = 120_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {

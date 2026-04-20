@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { launchBrowser, needsLogin, bringToFront, waitForLogin } from "./browser.mjs";
+import { launchBrowser, needsLogin, bringToFront, waitForLogin, notify } from "./browser.mjs";
 import { downloadAllInvoices } from "./invoice.mjs";
 import { sendEmail } from "./email.mjs";
 
@@ -20,30 +20,36 @@ async function markAsSent(sentSet, filename) {
 }
 
 async function main() {
-  console.log(`Launching browser (${HEADED ? "headed" : "headless"} mode)...`);
-  const { context, page } = await launchBrowser({ headed: HEADED });
+  let headed = HEADED;
+  console.log(`Launching browser (${headed ? "headed" : "headless"} mode)...`);
+  let { context, page } = await launchBrowser({ headed });
 
   try {
-    const loginRequired = await needsLogin(page);
+    let loginRequired = await needsLogin(page);
 
-    if (loginRequired && !HEADED) {
-      throw new Error(
-        "Login required. Run `npm run login` first to complete Google OAuth in a visible browser.",
-      );
+    if (loginRequired && !headed) {
+      console.log("Login required — notifying and reopening in visible browser...");
+      notify("Cursor Billing", "You need to relogin to Cursor");
+      await context.close();
+      headed = true;
+      ({ context, page } = await launchBrowser({ headed: true }));
+      loginRequired = await needsLogin(page);
     }
 
-    if (loginRequired && HEADED) {
+    if (loginRequired) {
       bringToFront();
-      console.log("Please complete login in the browser window (waiting up to 2 minutes)...");
-      const loggedIn = await waitForLogin(page, 120_000);
+      console.log("Please complete login in the browser window (waiting up to 10 minutes)...");
+      const loggedIn = await waitForLogin(page, 600_000);
 
       if (!loggedIn) {
         throw new Error("Timed out waiting for login. Please try again.");
       }
 
-      console.log("Login successful!");
+      console.log("Login successful! Reopening headless to continue...");
+      await context.close();
+      headed = HEADED;
+      ({ context, page } = await launchBrowser({ headed }));
 
-      // Re-navigate to billing page after login
       const stillNeedsLogin = await needsLogin(page);
       if (stillNeedsLogin) {
         throw new Error("Still not logged in after authentication. Please retry.");
